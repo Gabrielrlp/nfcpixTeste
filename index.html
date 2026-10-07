@@ -6,102 +6,74 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
+    <meta name="theme-color" content="#0b3d2a" />
     <title>Pagar com Pix</title>
     <style>
-      :root {
-        --bg: #f3f7f4;
-        --card: #fff;
-        --ink: #14231b;
-        --mut: #5b6b62;
-        --acc: #0a7d4f;
-        --line: #d7e3db;
-        box-sizing: border-box;
-        padding-top: env(safe-area-inset-top, 0px);
-        padding-bottom: env(safe-area-inset-bottom, 0px);
-      }
-      @media (prefers-color-scheme: dark) {
-        :root:not([data-theme="light"]) {
-          --bg: #0e1612;
-          --card: #17221c;
-          --ink: #eaf3ed;
-          --mut: #9db0a5;
-          --acc: #3ddc97;
-          --line: #2a3a31;
-        }
-      }
-      :root[data-theme="dark"] {
-        --bg: #0e1612;
-        --card: #17221c;
-        --ink: #eaf3ed;
-        --mut: #9db0a5;
-        --acc: #3ddc97;
-        --line: #2a3a31;
-      }
-      html {
-        scroll-padding-top: env(safe-area-inset-top, 0px);
-      }
       * {
         box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
       }
+      html,
       body {
         margin: 0;
-        background: var(--bg);
-        color: var(--ink);
+      }
+      body {
+        background: #0b3d2a;
+        color: #fff;
         font-family:
           system-ui,
           -apple-system,
           "Segoe UI",
           Roboto,
+          Arial,
           sans-serif;
         line-height: 1.4;
+        min-height: 100vh;
+        padding: env(safe-area-inset-top, 0) 0 env(safe-area-inset-bottom, 0);
       }
       main {
         max-width: 480px;
         margin: 0 auto;
-        padding: 24px 16px 40px;
+        padding: 24px 16px 48px;
       }
       h1 {
-        font-size: 1.6rem;
-        margin: 0 0 4px;
+        font-size: 1.7rem;
+        margin: 0 0 6px;
+      }
+      h2 {
+        font-size: 1.05rem;
+        margin: 28px 0 4px;
       }
       p {
         margin: 0;
-        color: var(--mut);
+        color: #c9e3d6;
       }
       .key {
-        background: var(--card);
-        border: 1px solid var(--line);
+        border: 1px solid #2f7a5a;
         border-radius: 14px;
         padding: 16px;
         margin: 20px 0 12px;
       }
       .key b {
         display: block;
-        font-size: 1.35rem;
+        font-size: 1.4rem;
         margin-top: 4px;
         letter-spacing: 0.5px;
+        color: #fff;
+      }
+      button {
+        font: inherit;
+        cursor: pointer;
+        background: #fff;
+        color: #0b3d2a;
+        border: 2px solid #fff;
+        border-radius: 12px;
+        font-weight: 700;
       }
       .copy {
         width: 100%;
         padding: 16px;
-        border: 0;
-        border-radius: 12px;
-        background: var(--acc);
-        color: #fff;
-        font-size: 1.05rem;
-        font-weight: 700;
-      }
-      :root[data-theme="dark"] .copy {
-        color: #06140d;
-      }
-      @media (prefers-color-scheme: dark) {
-        :root:not([data-theme="light"]) .copy {
-          color: #06140d;
-        }
-      }
-      h2 {
-        font-size: 1.05rem;
-        margin: 28px 0 4px;
+        font-size: 1.1rem;
       }
       .grid {
         display: grid;
@@ -110,19 +82,14 @@
         margin-top: 12px;
       }
       .grid button {
-        padding: 14px 8px;
-        border: 1px solid var(--line);
-        border-radius: 12px;
-        background: var(--card);
-        color: var(--ink);
-        font-size: 0.98rem;
-        font-weight: 600;
+        padding: 15px 8px;
+        font-size: 1rem;
       }
       button:active {
-        transform: scale(0.97);
+        background: #d9efe3;
       }
       button:focus-visible {
-        outline: 3px solid var(--acc);
+        outline: 3px solid #7dffc0;
         outline-offset: 2px;
       }
       .how {
@@ -136,11 +103,11 @@
         bottom: calc(16px + env(safe-area-inset-bottom, 0px));
         max-width: 448px;
         margin: 0 auto;
-        background: var(--ink);
-        color: var(--bg);
+        background: #fff;
+        color: #0b3d2a;
         padding: 14px 16px;
         border-radius: 12px;
-        font-weight: 600;
+        font-weight: 700;
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.2s;
@@ -162,17 +129,18 @@
       <button class="copy" id="copy">Copiar chave Pix</button>
 
       <h2>Abrir meu banco</h2>
-      <p>Toque no seu banco. A chave é copiada e o app abre.</p>
+      <p>Toque no seu banco. A chave é copiada e o app tenta abrir.</p>
       <div class="grid" id="grid"></div>
 
       <p class="how">
-        No app: Pix → Pagar → Chave → colar. Se o app não abrir, abra
-        manualmente: a chave já está copiada.
+        No app do banco: Pix → Pagar → Chave Pix → colar. Se o app não abrir,
+        abra manualmente: a chave já está copiada.
       </p>
     </main>
     <div id="t" role="status" aria-live="polite"></div>
     <script>
-      var KEY = "+5534988387442";
+      var KEY = "+5534988387442",
+        PLAIN = "34988387442";
       var BANKS = [
         ["Nubank", "com.nu.production", "nubank://"],
         ["Caixa", "br.com.gabba.Caixa", "caixa://"],
@@ -193,64 +161,52 @@
         clearTimeout(tt);
         tt = setTimeout(function () {
           t.className = "";
-        }, 3500);
+        }, 4000);
       }
-      function copyKey() {
-        return new Promise(function (ok) {
-          try {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-              navigator.clipboard.writeText(KEY).then(
-                function () {
-                  ok(true);
-                },
-                function () {
-                  ok(fb());
-                },
-              );
-            } else ok(fb());
-          } catch (e) {
-            ok(fb());
-          }
-        });
-      }
-      function fb() {
+      function copySync() {
         try {
           var a = document.createElement("textarea");
           a.value = KEY;
-          a.style.position = "fixed";
-          a.style.opacity = "0";
+          a.setAttribute("readonly", "");
+          a.style.cssText =
+            "position:fixed;top:0;left:0;opacity:0;font-size:16px";
           document.body.appendChild(a);
+          a.focus();
           a.select();
           a.setSelectionRange(0, 99);
           var r = document.execCommand("copy");
           document.body.removeChild(a);
-          return r;
-        } catch (e) {
-          return false;
-        }
+          if (r) return true;
+        } catch (e) {}
+        return false;
+      }
+      function copyKey() {
+        var ok = copySync();
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(KEY);
+            ok = true;
+          }
+        } catch (e) {}
+        return ok;
       }
       document.getElementById("copy").onclick = function () {
-        copyKey().then(function (r) {
-          toast(
-            r
-              ? "Chave copiada! Cole no app do seu banco."
-              : "Não copiou. Digite: 34988387442",
-          );
-        });
+        toast(
+          copyKey()
+            ? "Chave copiada! Cole no app do seu banco."
+            : "Não copiou. Digite: " + PLAIN,
+        );
       };
       var g = document.getElementById("grid");
       BANKS.forEach(function (b) {
         var el = document.createElement("button");
         el.textContent = b[0];
         el.onclick = function () {
-          var ok = fb();
-          try {
-            navigator.clipboard.writeText(KEY);
-          } catch (e) {}
+          var ok = copyKey();
           toast(
             ok
               ? "Chave copiada! Abrindo " + b[0] + "…"
-              : "Abrindo " + b[0] + "… chave: 34988387442",
+              : "Abrindo " + b[0] + "… chave: " + PLAIN,
           );
           var fall = encodeURIComponent(location.href.split("#")[0]);
           if (/Android/i.test(navigator.userAgent)) {
@@ -263,6 +219,16 @@
           } else {
             location.href = b[2];
           }
+          setTimeout(function () {
+            if (!document.hidden)
+              toast(
+                ok
+                  ? "Não abriu? Abra o " +
+                      b[0] +
+                      " e cole em Pix. A chave já está copiada."
+                  : "Não abriu? Abra o " + b[0] + " e digite a chave: " + PLAIN,
+              );
+          }, 1800);
         };
         g.appendChild(el);
       });
