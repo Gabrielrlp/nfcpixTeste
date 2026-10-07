@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Pagar com Pix</title>
+    <style>
+      :root {
+        --bg: #f3f7f4;
+        --card: #fff;
+        --ink: #14231b;
+        --mut: #5b6b62;
+        --acc: #0a7d4f;
+        --line: #d7e3db;
+        box-sizing: border-box;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --bg: #0e1612;
+          --card: #17221c;
+          --ink: #eaf3ed;
+          --mut: #9db0a5;
+          --acc: #3ddc97;
+          --line: #2a3a31;
+        }
+      }
+      :root[data-theme="dark"] {
+        --bg: #0e1612;
+        --card: #17221c;
+        --ink: #eaf3ed;
+        --mut: #9db0a5;
+        --acc: #3ddc97;
+        --line: #2a3a31;
+      }
+      html {
+        scroll-padding-top: env(safe-area-inset-top, 0px);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        line-height: 1.4;
+      }
+      main {
+        max-width: 480px;
+        margin: 0 auto;
+        padding: 24px 16px 40px;
+      }
+      h1 {
+        font-size: 1.6rem;
+        margin: 0 0 4px;
+      }
+      p {
+        margin: 0;
+        color: var(--mut);
+      }
+      .key {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 16px;
+        margin: 20px 0 12px;
+      }
+      .key b {
+        display: block;
+        font-size: 1.35rem;
+        margin-top: 4px;
+        letter-spacing: 0.5px;
+      }
+      .copy {
+        width: 100%;
+        padding: 16px;
+        border: 0;
+        border-radius: 12px;
+        background: var(--acc);
+        color: #fff;
+        font-size: 1.05rem;
+        font-weight: 700;
+      }
+      :root[data-theme="dark"] .copy {
+        color: #06140d;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) .copy {
+          color: #06140d;
+        }
+      }
+      h2 {
+        font-size: 1.05rem;
+        margin: 28px 0 4px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 12px;
+      }
+      .grid button {
+        padding: 14px 8px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--card);
+        color: var(--ink);
+        font-size: 0.98rem;
+        font-weight: 600;
+      }
+      button:active {
+        transform: scale(0.97);
+      }
+      button:focus-visible {
+        outline: 3px solid var(--acc);
+        outline-offset: 2px;
+      }
+      .how {
+        margin-top: 24px;
+        font-size: 0.92rem;
+      }
+      #t {
+        position: fixed;
+        left: 16px;
+        right: 16px;
+        bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+        max-width: 448px;
+        margin: 0 auto;
+        background: var(--ink);
+        color: var(--bg);
+        padding: 14px 16px;
+        border-radius: 12px;
+        font-weight: 600;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+      }
+      #t.on {
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Pagar com Pix</h1>
+      <p>Copie a chave e pague no app do seu banco.</p>
+
+      <div class="key">
+        <p>Chave Pix (celular)</p>
+        <b>(34) 98838-7442</b>
+      </div>
+      <button class="copy" id="copy">Copiar chave Pix</button>
+
+      <h2>Abrir meu banco</h2>
+      <p>Toque no seu banco. A chave é copiada e o app abre.</p>
+      <div class="grid" id="grid"></div>
+
+      <p class="how">
+        No app: Pix → Pagar → Chave → colar. Se o app não abrir, abra
+        manualmente: a chave já está copiada.
+      </p>
+    </main>
+    <div id="t" role="status" aria-live="polite"></div>
+    <script>
+      var KEY = "+5534988387442";
+      var BANKS = [
+        ["Nubank", "com.nu.production", "nubank://"],
+        ["Caixa", "br.com.gabba.Caixa", "caixa://"],
+        ["Banco do Brasil", "br.com.bb.android", "bbapp://"],
+        ["Inter", "br.com.intermedium", "bancointer://"],
+        ["Bradesco", "com.bradesco", "bradesco://"],
+        ["Itaú", "com.itau", "itau://"],
+        ["Mercado Pago", "com.mercadopago.wallet", "mercadopago://"],
+        ["Santander", "com.santander.app", "santander://"],
+        ["PicPay", "com.picpay", "picpay://"],
+        ["PagBank", "br.com.uol.ps.myaccount", "pagbank://"],
+      ];
+      var tt;
+      function toast(m) {
+        var t = document.getElementById("t");
+        t.textContent = m;
+        t.className = "on";
+        clearTimeout(tt);
+        tt = setTimeout(function () {
+          t.className = "";
+        }, 3500);
+      }
+      function copyKey() {
+        return new Promise(function (ok) {
+          try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(KEY).then(
+                function () {
+                  ok(true);
+                },
+                function () {
+                  ok(fb());
+                },
+              );
+            } else ok(fb());
+          } catch (e) {
+            ok(fb());
+          }
+        });
+      }
+      function fb() {
+        try {
+          var a = document.createElement("textarea");
+          a.value = KEY;
+          a.style.position = "fixed";
+          a.style.opacity = "0";
+          document.body.appendChild(a);
+          a.select();
+          a.setSelectionRange(0, 99);
+          var r = document.execCommand("copy");
+          document.body.removeChild(a);
+          return r;
+        } catch (e) {
+          return false;
+        }
+      }
+      document.getElementById("copy").onclick = function () {
+        copyKey().then(function (r) {
+          toast(
+            r
+              ? "Chave copiada! Cole no app do seu banco."
+              : "Não copiou. Digite: 34988387442",
+          );
+        });
+      };
+      var g = document.getElementById("grid");
+      BANKS.forEach(function (b) {
+        var el = document.createElement("button");
+        el.textContent = b[0];
+        el.onclick = function () {
+          copyKey().then(function (r) {
+            toast(
+              r
+                ? "Chave copiada! Abrindo " + b[0] + "…"
+                : "Abrindo " + b[0] + "… chave: 34988387442",
+            );
+            setTimeout(function () {
+              var ua = navigator.userAgent;
+              if (/Android/i.test(ua)) {
+                location.href =
+                  "intent://#Intent;scheme=https;package=" + b[1] + ";end";
+              } else {
+                location.href = b[2];
+              }
+            }, 700);
+          });
+        };
+        g.appendChild(el);
+      });
+    </script>
+  </body>
+</html>
