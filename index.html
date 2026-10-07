@@ -243,22 +243,26 @@
         var el = document.createElement("button");
         el.textContent = b[0];
         el.onclick = function () {
-          copyKey().then(function (r) {
-            toast(
-              r
-                ? "Chave copiada! Abrindo " + b[0] + "…"
-                : "Abrindo " + b[0] + "… chave: 34988387442",
-            );
-            setTimeout(function () {
-              var ua = navigator.userAgent;
-              if (/Android/i.test(ua)) {
-                location.href =
-                  "intent://#Intent;scheme=https;package=" + b[1] + ";end";
-              } else {
-                location.href = b[2];
-              }
-            }, 700);
-          });
+          var ok = fb();
+          try {
+            navigator.clipboard.writeText(KEY);
+          } catch (e) {}
+          toast(
+            ok
+              ? "Chave copiada! Abrindo " + b[0] + "…"
+              : "Abrindo " + b[0] + "… chave: 34988387442",
+          );
+          var fall = encodeURIComponent(location.href.split("#")[0]);
+          if (/Android/i.test(navigator.userAgent)) {
+            location.href =
+              "intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=" +
+              b[1] +
+              ";S.browser_fallback_url=" +
+              fall +
+              ";end";
+          } else {
+            location.href = b[2];
+          }
         };
         g.appendChild(el);
       });
