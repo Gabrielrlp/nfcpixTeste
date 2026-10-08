@@ -1,339 +1,356 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0b120e">
-  <meta name="description" content="Pagamento rápido por Pix">
-  <title>Pagar com Pix</title>
-  <style>
-    :root {
-      --bg: #0b120e;
-      --card: #15211b;
-      --card-hover: #1a2a22;
-      --border: #2a3c32;
-      --text: #f5f7f6;
-      --muted: #aebbb4;
-      --green: #39d995;
-      --green-hover: #4ae5a3;
-      --black: #07100b;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#0b120e" />
+    <title>Pagar com Pix</title>
+    <style>
+      :root {
+        --bg: #0b120e;
+        --card: #15211b;
+        --card2: #111a16;
+        --border: #2a3c32;
+        --text: #f5f7f6;
+        --muted: #aebbb4;
+        --green: #39d995;
+        --green2: #4ae5a3;
+        --black: #07100b;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Arial, Helvetica, sans-serif;
+        display: flex;
+        justify-content: center;
+      }
+      .container {
+        width: min(100%, 520px);
+        padding: 24px 22px 45px;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 27px;
+        line-height: 1.15;
+      }
+      .subtitle {
+        margin: 0 0 20px;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.45;
+      }
+      .pix-box {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 17px 16px;
+        margin-bottom: 12px;
+      }
+      .label {
+        display: block;
+        color: var(--muted);
+        font-size: 14px;
+        margin-bottom: 8px;
+      }
+      .pix-key {
+        font-size: 21px;
+        font-weight: 700;
+        overflow-wrap: anywhere;
+      }
+      button {
+        font-family: inherit;
+      }
+      .copy-btn {
+        width: 100%;
+        border: 0;
+        border-radius: 12px;
+        padding: 15px 18px;
+        background: var(--green);
+        color: var(--black);
+        font-size: 16px;
+        font-weight: 800;
+        cursor: pointer;
+        margin-bottom: 28px;
+      }
+      .copy-btn:hover {
+        background: var(--green2);
+      }
+      h2 {
+        margin: 0 0 6px;
+        font-size: 18px;
+      }
+      .bank-help {
+        margin: 0 0 13px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.45;
+      }
+      .banks {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .bank-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 49px;
+        padding: 10px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--card);
+        color: var(--text);
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .bank-btn:hover {
+        background: #1a2a22;
+        border-color: #3b5447;
+      }
+      .info {
+        margin-top: 27px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.55;
+      }
+      .info strong {
+        color: var(--text);
+      }
+      .ios-note {
+        display: none;
+        margin-top: 18px;
+        background: var(--card2);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 13px 14px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .ios-note strong {
+        color: var(--text);
+      }
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 20px;
+        transform: translate(-50%, 20px);
+        width: min(calc(100% - 32px), 430px);
+        padding: 13px 16px;
+        border-radius: 11px;
+        background: #18271f;
+        border: 1px solid #355141;
+        color: #fff;
+        text-align: center;
+        font-size: 14px;
+        opacity: 0;
+        pointer-events: none;
+        transition: 0.2s;
+        z-index: 10;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+      @media (max-width: 360px) {
+        .container {
+          padding-left: 15px;
+          padding-right: 15px;
+        }
+        .banks {
+          gap: 8px;
+        }
+        .bank-btn {
+          font-size: 14px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <h1>Pagar com Pix</h1>
+      <p class="subtitle">Copie a chave e pague no app do seu banco.</p>
 
-    * { box-sizing: border-box; }
+      <section class="pix-box">
+        <span class="label">Chave Pix (celular)</span>
+        <div class="pix-key" id="pixKey">+55 (34) 98838-7442</div>
+      </section>
 
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: var(--bg);
-      color: var(--text);
-      font-family: Arial, Helvetica, sans-serif;
-      display: flex;
-      justify-content: center;
-    }
+      <button class="copy-btn" id="copyBtn" type="button">
+        Copiar chave Pix
+      </button>
 
-    .container {
-      width: min(100%, 520px);
-      padding: 24px 22px 44px;
-    }
+      <h2>Abrir meu banco</h2>
+      <p class="bank-help">
+        No Android/Chrome, tocamos no app por uma Intent. Em outros
+        dispositivos, usamos o melhor fallback disponível.
+      </p>
 
-    h1 {
-      margin: 0 0 8px;
-      font-size: 27px;
-      line-height: 1.15;
-    }
+      <div class="banks" id="banks"></div>
 
-    .subtitle {
-      margin: 0 0 20px;
-      color: var(--muted);
-      font-size: 15px;
-      line-height: 1.45;
-    }
+      <p class="info">
+        No app: <strong>Pix → Pagar → Chave → colar.</strong><br />
+        A chave é copiada antes da tentativa de abrir o aplicativo.
+      </p>
 
-    .pix-box {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 17px 16px;
-      margin-bottom: 12px;
-    }
+      <div class="ios-note" id="iosNote">
+        <strong>Você está no iPhone/iPad.</strong><br />
+        O iOS só permite que um site abra diretamente um banco quando o próprio
+        banco expõe um link de aplicativo compatível. Não existe um comando HTML
+        universal para forçar todos os bancos a abrirem. Neste aparelho, use o
+        botão para copiar e abra o banco manualmente.
+      </div>
+    </main>
+    <div class="toast" id="toast"></div>
 
-    .label {
-      display: block;
-      color: #aebbb4;
-      font-size: 14px;
-      margin-bottom: 8px;
-    }
+    <script>
+      // ============================
+      // CONFIGURAÇÃO
+      // ============================
+      const PIX_KEY = "34988387442";
 
-    .pix-key {
-      font-size: 21px;
-      font-weight: 700;
-      letter-spacing: .2px;
-      overflow-wrap: anywhere;
-    }
+      // IDs atuais dos aplicativos Android, conferidos nas páginas da Google Play.
+      const BANKS = [
+        {
+          name: "Nubank",
+          package: "com.nu.production",
+          play: "https://play.google.com/store/apps/details?id=com.nu.production",
+        },
+        {
+          name: "Caixa",
+          package: "br.gov.caixa.tem",
+          play: "https://play.google.com/store/apps/details?id=br.gov.caixa.tem",
+        },
+        {
+          name: "Banco do Brasil",
+          package: "br.com.bb.android",
+          play: "https://play.google.com/store/apps/details?id=br.com.bb.android",
+        },
+        {
+          name: "Inter",
+          package: "br.com.intermedium",
+          play: "https://play.google.com/store/apps/details?id=br.com.intermedium",
+        },
+        {
+          name: "Bradesco",
+          package: "com.bradesco",
+          play: "https://play.google.com/store/apps/details?id=com.bradesco",
+        },
+        {
+          name: "Itaú",
+          package: "com.itau",
+          play: "https://play.google.com/store/apps/details?id=com.itau",
+        },
+        {
+          name: "Mercado Pago",
+          package: "com.mercadopago.wallet",
+          play: "https://play.google.com/store/apps/details?id=com.mercadopago.wallet",
+        },
+        {
+          name: "Santander",
+          package: "com.santander.app",
+          play: "https://play.google.com/store/apps/details?id=com.santander.app",
+        },
+        {
+          name: "PicPay",
+          package: "com.picpay",
+          play: "https://play.google.com/store/apps/details?id=com.picpay",
+        },
+        {
+          name: "PagBank",
+          package: "br.com.uol.ps.myaccount",
+          play: "https://play.google.com/store/apps/details?id=br.com.uol.ps.myaccount",
+        },
+      ];
 
-    .copy-btn {
-      width: 100%;
-      border: 0;
-      border-radius: 12px;
-      padding: 15px 18px;
-      background: var(--green);
-      color: var(--black);
-      font-size: 16px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: .15s ease;
-      margin-bottom: 28px;
-    }
+      const ua = navigator.userAgent || "";
+      const isAndroid = /Android/i.test(ua);
+      const isIOS = /iPhone|iPad|iPod/i.test(ua);
 
-    .copy-btn:hover { background: var(--green-hover); transform: translateY(-1px); }
-    .copy-btn:active { transform: translateY(0); }
+      const toast = document.getElementById("toast");
+      const iosNote = document.getElementById("iosNote");
 
-    h2 {
-      margin: 0 0 6px;
-      font-size: 18px;
-    }
+      function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add("show");
+        clearTimeout(showToast.timer);
+        showToast.timer = setTimeout(
+          () => toast.classList.remove("show"),
+          2600,
+        );
+      }
 
-    .bank-help {
-      margin: 0 0 13px;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.45;
-    }
-
-    .banks {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .bank-btn {
-      min-height: 49px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--card);
-      color: var(--text);
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: .15s ease;
-    }
-
-    .bank-btn:hover {
-      background: var(--card-hover);
-      border-color: #3b5447;
-      transform: translateY(-1px);
-    }
-
-    .bank-btn:active { transform: translateY(0); }
-
-    .info {
-      margin-top: 27px;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.55;
-    }
-
-    .toast {
-      position: fixed;
-      left: 50%;
-      bottom: 22px;
-      transform: translate(-50%, 20px);
-      width: min(calc(100% - 32px), 430px);
-      padding: 13px 16px;
-      border-radius: 11px;
-      background: #18271f;
-      border: 1px solid #355141;
-      color: white;
-      text-align: center;
-      font-size: 14px;
-      opacity: 0;
-      pointer-events: none;
-      transition: .2s ease;
-      z-index: 10;
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translate(-50%, 0);
-    }
-
-    .manual {
-      display: none;
-      margin-top: 16px;
-      padding: 14px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: #111b16;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    .manual strong { color: var(--text); }
-
-    @media (max-width: 360px) {
-      .container { padding-left: 15px; padding-right: 15px; }
-      .banks { gap: 8px; }
-      .bank-btn { font-size: 14px; }
-    }
-  </style>
-</head>
-
-<body>
-  <main class="container">
-    <h1>Pagar com Pix</h1>
-    <p class="subtitle">Copie a chave e pague no app do seu banco.</p>
-
-    <section class="pix-box">
-      <span class="label">Chave Pix (celular)</span>
-      <div class="pix-key" id="pixKey">+55 (34) 98838-7442</div>
-    </section>
-
-    <button class="copy-btn" id="copyBtn">Copiar chave Pix</button>
-
-    <h2>Abrir meu banco</h2>
-    <p class="bank-help">Toque no seu banco. A chave é copiada e tentaremos abrir o app.</p>
-
-    <div class="banks">
-      <button class="bank-btn" data-bank="Nubank">Nubank</button>
-      <button class="bank-btn" data-bank="Caixa">Caixa</button>
-      <button class="bank-btn" data-bank="Banco do Brasil">Banco do Brasil</button>
-      <button class="bank-btn" data-bank="Inter">Inter</button>
-      <button class="bank-btn" data-bank="Bradesco">Bradesco</button>
-      <button class="bank-btn" data-bank="Itaú">Itaú</button>
-      <button class="bank-btn" data-bank="Mercado Pago">Mercado Pago</button>
-      <button class="bank-btn" data-bank="Santander">Santander</button>
-      <button class="bank-btn" data-bank="PicPay">PicPay</button>
-      <button class="bank-btn" data-bank="PagBank">PagBank</button>
-    </div>
-
-    <p class="info">
-      No app: <strong>Pix → Pagar → Chave → colar</strong>.<br>
-      Se o app não abrir, abra-o manualmente: a chave já estará copiada.
-    </p>
-
-    <div class="manual" id="manual">
-      <strong>Não foi possível abrir o aplicativo.</strong><br>
-      A chave já foi copiada. Abra o banco manualmente e use a opção Pix → Pagar → Chave Pix.
-    </div>
-  </main>
-
-  <div class="toast" id="toast"></div>
-
-  <script>
-    // Troque somente este valor se quiser usar outra chave.
-    const PIX_KEY = "34988387442";
-
-    /*
-      Os esquemas abaixo são tentativas de abrir o aplicativo.
-      IMPORTANTE: cada banco controla seus próprios links/deep links.
-      Por isso, se um esquema deixar de funcionar, o fallback de copiar
-      a chave continua funcionando.
-    */
-    const BANK_SCHEMES = {
-      "Nubank": "nubank://",
-      "Caixa": "caixa-tem://",
-      "Banco do Brasil": "bb://",
-      "Inter": "inter://",
-      "Bradesco": "bradesco://",
-      "Itaú": "itau://",
-      "Mercado Pago": "mercadopago://",
-      "Santander": "santander://",
-      "PicPay": "picpay://",
-      "PagBank": "pagbank://"
-    };
-
-    const toast = document.getElementById("toast");
-    const manual = document.getElementById("manual");
-
-    function showToast(message) {
-      toast.textContent = message;
-      toast.classList.add("show");
-      clearTimeout(showToast.timer);
-      showToast.timer = setTimeout(() => toast.classList.remove("show"), 2800);
-    }
-
-    async function copyPix() {
-      try {
-        await navigator.clipboard.writeText(PIX_KEY);
-        showToast("✓ Chave Pix copiada!");
-        return true;
-      } catch (error) {
-        // Fallback para navegadores mais antigos ou contexto sem HTTPS.
-        const textarea = document.createElement("textarea");
-        textarea.value = PIX_KEY;
-        textarea.style.position = "fixed";
-        textarea.style.opacity = "0";
-        document.body.appendChild(textarea);
-        textarea.focus();
-        textarea.select();
-
-        let copied = false;
+      async function copyPix() {
+        // Tenta a API moderna.
         try {
-          copied = document.execCommand("copy");
-        } catch (_) {}
-
-        textarea.remove();
-
-        if (copied) {
+          await navigator.clipboard.writeText(PIX_KEY);
           showToast("✓ Chave Pix copiada!");
           return true;
-        }
+        } catch (e) {}
 
-        showToast("Copie a chave manualmente.");
+        // Fallback para navegadores antigos/contextos sem Clipboard API.
+        try {
+          const ta = document.createElement("textarea");
+          ta.value = PIX_KEY;
+          ta.setAttribute("readonly", "");
+          ta.style.position = "fixed";
+          ta.style.top = "-1000px";
+          document.body.appendChild(ta);
+          ta.select();
+          const ok = document.execCommand("copy");
+          ta.remove();
+          if (ok) {
+            showToast("✓ Chave Pix copiada!");
+            return true;
+          }
+        } catch (e) {}
+
+        showToast("Não foi possível copiar automaticamente.");
         return false;
       }
-    }
-
-    async function openBank(bank) {
-      manual.style.display = "none";
-
-      const copied = await copyPix();
-
-      if (!copied) {
-        manual.style.display = "block";
-        return;
-      }
-
-      const scheme = BANK_SCHEMES[bank];
-
-      if (!scheme) {
-        manual.style.display = "block";
-        return;
-      }
-
-      showToast(`Abrindo ${bank}...`);
 
       /*
-        Tenta abrir o app. O timeout mostra o fallback se nada acontecer.
-        O "blur" ajuda a detectar quando o navegador saiu para outro app.
-      */
-      let leftPage = false;
-      const onBlur = () => { leftPage = true; };
+    Chrome/Android documenta a sintaxe intent:// para lançar apps a partir de
+    uma página com um gesto do usuário. O fallback pode levar à Google Play.
+  */
+      function androidIntent(bank) {
+        const fallback = encodeURIComponent(bank.play);
+        return `intent://open/#Intent;scheme=https;action=android.intent.action.VIEW;package=${bank.package};S.browser_fallback_url=${fallback};end`;
+      }
 
-      window.addEventListener("blur", onBlur, { once: true });
+      function renderBanks() {
+        const container = document.getElementById("banks");
 
-      const startedAt = Date.now();
-      window.location.href = scheme;
+        BANKS.forEach((bank) => {
+          const a = document.createElement("a");
+          a.className = "bank-btn";
+          a.href = isAndroid ? androidIntent(bank) : bank.play;
+          a.textContent = bank.name;
 
-      setTimeout(() => {
-        window.removeEventListener("blur", onBlur);
+          a.addEventListener("click", () => {
+            // A chamada começa dentro do gesto do usuário.
+            // Não usamos setTimeout para iniciar a Intent, pois navegadores podem bloquear.
+            copyPix();
+          });
 
-        // Se o navegador continuou aberto, provavelmente o esquema não funcionou.
-        if (!leftPage && Date.now() - startedAt >= 1200) {
-          manual.style.display = "block";
-          showToast("App não abriu. A chave continua copiada.");
-        }
-      }, 1500);
-    }
+          container.appendChild(a);
+        });
 
-    document.getElementById("copyBtn").addEventListener("click", copyPix);
+        if (isIOS) iosNote.style.display = "block";
+      }
 
-    document.querySelectorAll(".bank-btn").forEach(button => {
-      button.addEventListener("click", () => {
-        openBank(button.dataset.bank);
-      });
-    });
-  </script>
-</body>
+      document.getElementById("copyBtn").addEventListener("click", copyPix);
+      renderBanks();
+    </script>
+  </body>
 </html>
