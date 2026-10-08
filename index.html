@@ -1,237 +1,339 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover"
-    />
-    <meta name="theme-color" content="#0b3d2a" />
-    <title>Pagar com Pix</title>
-    <style>
-      * {
-        box-sizing: border-box;
-        -webkit-tap-highlight-color: transparent;
-      }
-      html,
-      body {
-        margin: 0;
-      }
-      body {
-        background: #0b3d2a;
-        color: #fff;
-        font-family:
-          system-ui,
-          -apple-system,
-          "Segoe UI",
-          Roboto,
-          Arial,
-          sans-serif;
-        line-height: 1.4;
-        min-height: 100vh;
-        padding: env(safe-area-inset-top, 0) 0 env(safe-area-inset-bottom, 0);
-      }
-      main {
-        max-width: 480px;
-        margin: 0 auto;
-        padding: 24px 16px 48px;
-      }
-      h1 {
-        font-size: 1.7rem;
-        margin: 0 0 6px;
-      }
-      h2 {
-        font-size: 1.05rem;
-        margin: 28px 0 4px;
-      }
-      p {
-        margin: 0;
-        color: #c9e3d6;
-      }
-      .key {
-        border: 1px solid #2f7a5a;
-        border-radius: 14px;
-        padding: 16px;
-        margin: 20px 0 12px;
-      }
-      .key b {
-        display: block;
-        font-size: 1.4rem;
-        margin-top: 4px;
-        letter-spacing: 0.5px;
-        color: #fff;
-      }
-      button {
-        font: inherit;
-        cursor: pointer;
-        background: #fff;
-        color: #0b3d2a;
-        border: 2px solid #fff;
-        border-radius: 12px;
-        font-weight: 700;
-      }
-      .copy {
-        width: 100%;
-        padding: 16px;
-        font-size: 1.1rem;
-      }
-      .grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-        margin-top: 12px;
-      }
-      .grid button {
-        padding: 15px 8px;
-        font-size: 1rem;
-      }
-      button:active {
-        background: #d9efe3;
-      }
-      button:focus-visible {
-        outline: 3px solid #7dffc0;
-        outline-offset: 2px;
-      }
-      .how {
-        margin-top: 24px;
-        font-size: 0.92rem;
-      }
-      #t {
-        position: fixed;
-        left: 16px;
-        right: 16px;
-        bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-        max-width: 448px;
-        margin: 0 auto;
-        background: #fff;
-        color: #0b3d2a;
-        padding: 14px 16px;
-        border-radius: 12px;
-        font-weight: 700;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.2s;
-      }
-      #t.on {
-        opacity: 1;
-      }
-    </style>
-  </head>
-  <body>
-    <main>
-      <h1>Pagar com Pix</h1>
-      <p>Copie a chave e pague no app do seu banco.</p>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b120e">
+  <meta name="description" content="Pagamento rápido por Pix">
+  <title>Pagar com Pix</title>
+  <style>
+    :root {
+      --bg: #0b120e;
+      --card: #15211b;
+      --card-hover: #1a2a22;
+      --border: #2a3c32;
+      --text: #f5f7f6;
+      --muted: #aebbb4;
+      --green: #39d995;
+      --green-hover: #4ae5a3;
+      --black: #07100b;
+    }
 
-      <div class="key">
-        <p>Chave Pix (celular)</p>
-        <b>(34) 98838-7442</b>
-      </div>
-      <button class="copy" id="copy">Copiar chave Pix</button>
+    * { box-sizing: border-box; }
 
-      <h2>Abrir meu banco</h2>
-      <p>Toque no seu banco. A chave é copiada e o app tenta abrir.</p>
-      <div class="grid" id="grid"></div>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      display: flex;
+      justify-content: center;
+    }
 
-      <p class="how">
-        No app do banco: Pix → Pagar → Chave Pix → colar. Se o app não abrir,
-        abra manualmente: a chave já está copiada.
-      </p>
-    </main>
-    <div id="t" role="status" aria-live="polite"></div>
-    <script>
-      var KEY = "+5534988387442",
-        PLAIN = "34988387442";
-      var BANKS = [
-        ["Nubank", "com.nu.production", "nubank://"],
-        ["Caixa", "br.com.gabba.Caixa", "caixa://"],
-        ["Banco do Brasil", "br.com.bb.android", "bbapp://"],
-        ["Inter", "br.com.intermedium", "bancointer://"],
-        ["Bradesco", "com.bradesco", "bradesco://"],
-        ["Itaú", "com.itau", "itau://"],
-        ["Mercado Pago", "com.mercadopago.wallet", "mercadopago://"],
-        ["Santander", "com.santander.app", "santander://"],
-        ["PicPay", "com.picpay", "picpay://"],
-        ["PagBank", "br.com.uol.ps.myaccount", "pagbank://"],
-      ];
-      var tt;
-      function toast(m) {
-        var t = document.getElementById("t");
-        t.textContent = m;
-        t.className = "on";
-        clearTimeout(tt);
-        tt = setTimeout(function () {
-          t.className = "";
-        }, 4000);
-      }
-      function copySync() {
+    .container {
+      width: min(100%, 520px);
+      padding: 24px 22px 44px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 27px;
+      line-height: 1.15;
+    }
+
+    .subtitle {
+      margin: 0 0 20px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .pix-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 17px 16px;
+      margin-bottom: 12px;
+    }
+
+    .label {
+      display: block;
+      color: #aebbb4;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .pix-key {
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: .2px;
+      overflow-wrap: anywhere;
+    }
+
+    .copy-btn {
+      width: 100%;
+      border: 0;
+      border-radius: 12px;
+      padding: 15px 18px;
+      background: var(--green);
+      color: var(--black);
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: .15s ease;
+      margin-bottom: 28px;
+    }
+
+    .copy-btn:hover { background: var(--green-hover); transform: translateY(-1px); }
+    .copy-btn:active { transform: translateY(0); }
+
+    h2 {
+      margin: 0 0 6px;
+      font-size: 18px;
+    }
+
+    .bank-help {
+      margin: 0 0 13px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .banks {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .bank-btn {
+      min-height: 49px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--card);
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: .15s ease;
+    }
+
+    .bank-btn:hover {
+      background: var(--card-hover);
+      border-color: #3b5447;
+      transform: translateY(-1px);
+    }
+
+    .bank-btn:active { transform: translateY(0); }
+
+    .info {
+      margin-top: 27px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translate(-50%, 20px);
+      width: min(calc(100% - 32px), 430px);
+      padding: 13px 16px;
+      border-radius: 11px;
+      background: #18271f;
+      border: 1px solid #355141;
+      color: white;
+      text-align: center;
+      font-size: 14px;
+      opacity: 0;
+      pointer-events: none;
+      transition: .2s ease;
+      z-index: 10;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    .manual {
+      display: none;
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #111b16;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .manual strong { color: var(--text); }
+
+    @media (max-width: 360px) {
+      .container { padding-left: 15px; padding-right: 15px; }
+      .banks { gap: 8px; }
+      .bank-btn { font-size: 14px; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <h1>Pagar com Pix</h1>
+    <p class="subtitle">Copie a chave e pague no app do seu banco.</p>
+
+    <section class="pix-box">
+      <span class="label">Chave Pix (celular)</span>
+      <div class="pix-key" id="pixKey">+55 (34) 98838-7442</div>
+    </section>
+
+    <button class="copy-btn" id="copyBtn">Copiar chave Pix</button>
+
+    <h2>Abrir meu banco</h2>
+    <p class="bank-help">Toque no seu banco. A chave é copiada e tentaremos abrir o app.</p>
+
+    <div class="banks">
+      <button class="bank-btn" data-bank="Nubank">Nubank</button>
+      <button class="bank-btn" data-bank="Caixa">Caixa</button>
+      <button class="bank-btn" data-bank="Banco do Brasil">Banco do Brasil</button>
+      <button class="bank-btn" data-bank="Inter">Inter</button>
+      <button class="bank-btn" data-bank="Bradesco">Bradesco</button>
+      <button class="bank-btn" data-bank="Itaú">Itaú</button>
+      <button class="bank-btn" data-bank="Mercado Pago">Mercado Pago</button>
+      <button class="bank-btn" data-bank="Santander">Santander</button>
+      <button class="bank-btn" data-bank="PicPay">PicPay</button>
+      <button class="bank-btn" data-bank="PagBank">PagBank</button>
+    </div>
+
+    <p class="info">
+      No app: <strong>Pix → Pagar → Chave → colar</strong>.<br>
+      Se o app não abrir, abra-o manualmente: a chave já estará copiada.
+    </p>
+
+    <div class="manual" id="manual">
+      <strong>Não foi possível abrir o aplicativo.</strong><br>
+      A chave já foi copiada. Abra o banco manualmente e use a opção Pix → Pagar → Chave Pix.
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // Troque somente este valor se quiser usar outra chave.
+    const PIX_KEY = "34988387442";
+
+    /*
+      Os esquemas abaixo são tentativas de abrir o aplicativo.
+      IMPORTANTE: cada banco controla seus próprios links/deep links.
+      Por isso, se um esquema deixar de funcionar, o fallback de copiar
+      a chave continua funcionando.
+    */
+    const BANK_SCHEMES = {
+      "Nubank": "nubank://",
+      "Caixa": "caixa-tem://",
+      "Banco do Brasil": "bb://",
+      "Inter": "inter://",
+      "Bradesco": "bradesco://",
+      "Itaú": "itau://",
+      "Mercado Pago": "mercadopago://",
+      "Santander": "santander://",
+      "PicPay": "picpay://",
+      "PagBank": "pagbank://"
+    };
+
+    const toast = document.getElementById("toast");
+    const manual = document.getElementById("manual");
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove("show"), 2800);
+    }
+
+    async function copyPix() {
+      try {
+        await navigator.clipboard.writeText(PIX_KEY);
+        showToast("✓ Chave Pix copiada!");
+        return true;
+      } catch (error) {
+        // Fallback para navegadores mais antigos ou contexto sem HTTPS.
+        const textarea = document.createElement("textarea");
+        textarea.value = PIX_KEY;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+
+        let copied = false;
         try {
-          var a = document.createElement("textarea");
-          a.value = KEY;
-          a.setAttribute("readonly", "");
-          a.style.cssText =
-            "position:fixed;top:0;left:0;opacity:0;font-size:16px";
-          document.body.appendChild(a);
-          a.focus();
-          a.select();
-          a.setSelectionRange(0, 99);
-          var r = document.execCommand("copy");
-          document.body.removeChild(a);
-          if (r) return true;
-        } catch (e) {}
+          copied = document.execCommand("copy");
+        } catch (_) {}
+
+        textarea.remove();
+
+        if (copied) {
+          showToast("✓ Chave Pix copiada!");
+          return true;
+        }
+
+        showToast("Copie a chave manualmente.");
         return false;
       }
-      function copyKey() {
-        var ok = copySync();
-        try {
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(KEY);
-            ok = true;
-          }
-        } catch (e) {}
-        return ok;
+    }
+
+    async function openBank(bank) {
+      manual.style.display = "none";
+
+      const copied = await copyPix();
+
+      if (!copied) {
+        manual.style.display = "block";
+        return;
       }
-      document.getElementById("copy").onclick = function () {
-        toast(
-          copyKey()
-            ? "Chave copiada! Cole no app do seu banco."
-            : "Não copiou. Digite: " + PLAIN,
-        );
-      };
-      var g = document.getElementById("grid");
-      BANKS.forEach(function (b) {
-        var el = document.createElement("button");
-        el.textContent = b[0];
-        el.onclick = function () {
-          var ok = copyKey();
-          toast(
-            ok
-              ? "Chave copiada! Abrindo " + b[0] + "…"
-              : "Abrindo " + b[0] + "… chave: " + PLAIN,
-          );
-          var fall = encodeURIComponent(location.href.split("#")[0]);
-          if (/Android/i.test(navigator.userAgent)) {
-            location.href =
-              "intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=" +
-              b[1] +
-              ";S.browser_fallback_url=" +
-              fall +
-              ";end";
-          } else {
-            location.href = b[2];
-          }
-          setTimeout(function () {
-            if (!document.hidden)
-              toast(
-                ok
-                  ? "Não abriu? Abra o " +
-                      b[0] +
-                      " e cole em Pix. A chave já está copiada."
-                  : "Não abriu? Abra o " + b[0] + " e digite a chave: " + PLAIN,
-              );
-          }, 1800);
-        };
-        g.appendChild(el);
+
+      const scheme = BANK_SCHEMES[bank];
+
+      if (!scheme) {
+        manual.style.display = "block";
+        return;
+      }
+
+      showToast(`Abrindo ${bank}...`);
+
+      /*
+        Tenta abrir o app. O timeout mostra o fallback se nada acontecer.
+        O "blur" ajuda a detectar quando o navegador saiu para outro app.
+      */
+      let leftPage = false;
+      const onBlur = () => { leftPage = true; };
+
+      window.addEventListener("blur", onBlur, { once: true });
+
+      const startedAt = Date.now();
+      window.location.href = scheme;
+
+      setTimeout(() => {
+        window.removeEventListener("blur", onBlur);
+
+        // Se o navegador continuou aberto, provavelmente o esquema não funcionou.
+        if (!leftPage && Date.now() - startedAt >= 1200) {
+          manual.style.display = "block";
+          showToast("App não abriu. A chave continua copiada.");
+        }
+      }, 1500);
+    }
+
+    document.getElementById("copyBtn").addEventListener("click", copyPix);
+
+    document.querySelectorAll(".bank-btn").forEach(button => {
+      button.addEventListener("click", () => {
+        openBank(button.dataset.bank);
       });
-    </script>
-  </body>
+    });
+  </script>
+</body>
 </html>
