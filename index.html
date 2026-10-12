@@ -1,4 +1,3 @@
-HTML
 <!doctype html>
 <html lang="pt-BR">
   <head>
@@ -142,6 +141,8 @@ HTML
     <script>
       var KEY = "+5534988387442",
         PLAIN = "34988387442";
+
+      // [nome, pacote Android, esquema iOS]
       var BANKS = [
         ["Nubank", "com.nu.production", "nubank://"],
         ["Caixa", "br.com.gabba.Caixa", "caixa://"],
@@ -154,6 +155,16 @@ HTML
         ["PicPay", "com.picpay", "picpay://"],
         ["PagBank", "br.com.uol.ps.myaccount", "pagbank://"],
       ];
+
+      // ---------- detecção de plataforma ----------
+      var ua = navigator.userAgent || "";
+      var IS_ANDROID = /Android/i.test(ua);
+      // iPadOS novo se identifica como "Macintosh", por isso o teste de touch
+      var IS_IOS =
+        /iPhone|iPad|iPod/i.test(ua) ||
+        (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+      // ---------- toast ----------
       var tt;
       function toast(m) {
         var t = document.getElementById("t");
@@ -164,6 +175,8 @@ HTML
           t.className = "";
         }, 4000);
       }
+
+      // ---------- copiar ----------
       function copySync() {
         try {
           var a = document.createElement("textarea");
@@ -198,39 +211,73 @@ HTML
             : "Não copiou. Digite: " + PLAIN,
         );
       };
+
+      // ---------- abrir o app do banco ----------
+      function openBank(b) {
+        var name = b[0],
+          pkg = b[1],
+          scheme = b[2];
+
+        if (IS_ANDROID) {
+          // Abre o app pelo pacote (launcher). Se não estiver instalado,
+          // o Chrome manda para a página do app na Play Store.
+          var play = encodeURIComponent(
+            "https://play.google.com/store/apps/details?id=" + pkg,
+          );
+          location.href =
+            "intent:#Intent" +
+            ";action=android.intent.action.MAIN" +
+            ";category=android.intent.category.LAUNCHER" +
+            ";package=" +
+            pkg +
+            ";S.browser_fallback_url=" +
+            play +
+            ";end";
+        } else if (IS_IOS) {
+          // iOS: esquema de URL do app (só funciona se o app estiver instalado)
+          location.href = scheme;
+        } else {
+          // Computador: não há app para abrir
+          toast("Abra o app do " + name + " no celular e cole a chave em Pix.");
+          return false;
+        }
+        return true;
+      }
+
       var g = document.getElementById("grid");
       BANKS.forEach(function (b) {
         var el = document.createElement("button");
         el.textContent = b[0];
         el.onclick = function () {
           var ok = copyKey();
-          toast(
-            ok
-              ? "Chave copiada! Abrindo " + b[0] + "…"
-              : "Abrindo " + b[0] + "… chave: " + PLAIN,
-          );
-          var fall = encodeURIComponent(location.href.split("#")[0]);
-          if (/Android/i.test(navigator.userAgent)) {
-            location.href =
-              "intent://open#Intent;scheme=" +
-              b[2].replace("://", "") +
-              ";package=" +
-              b[1] +
-              ";S.browser_fallback_url=" +
-              fall +
-              ";end";
-          } else {
-            location.href = b[2];
+          if (IS_ANDROID || IS_IOS) {
+            toast(
+              ok
+                ? "Chave copiada! Abrindo " + b[0] + "…"
+                : "Abrindo " + b[0] + "… chave: " + PLAIN,
+            );
           }
+          if (!openBank(b)) return;
+
+          // Se a página continua visível depois de 1,8s, o app não abriu
+          var opened = false;
+          function onHide() {
+            if (document.hidden) opened = true;
+          }
+          document.addEventListener("visibilitychange", onHide);
+          window.addEventListener("pagehide", function () {
+            opened = true;
+          });
           setTimeout(function () {
-            if (!document.hidden)
-              toast(
-                ok
-                  ? "Não abriu? Abra o " +
-                      b[0] +
-                      " e cole em Pix. A chave já está copiada."
-                  : "Não abriu? Abra o " + b[0] + " e digite a chave: " + PLAIN,
-              );
+            document.removeEventListener("visibilitychange", onHide);
+            if (opened || document.hidden) return;
+            toast(
+              ok
+                ? "Não abriu? Abra o " +
+                    b[0] +
+                    " e cole em Pix. A chave já está copiada."
+                : "Não abriu? Abra o " + b[0] + " e digite a chave: " + PLAIN,
+            );
           }, 1800);
         };
         g.appendChild(el);
