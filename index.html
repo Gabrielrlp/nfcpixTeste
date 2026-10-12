@@ -221,17 +221,15 @@
         if (IS_ANDROID) {
           // Abre o app pelo pacote (launcher). Se não estiver instalado,
           // o Chrome manda para a página do app na Play Store.
-          var play = encodeURIComponent(
-            "https://play.google.com/store/apps/details?id=" + pkg,
-          );
+          // O Chrome só abre apps que declaram um esquema próprio,
+          // então usamos esquema + pacote. Sem fallback automático:
+          // se não abrir, o aviso na tela orienta a pessoa.
           location.href =
-            "intent:#Intent" +
-            ";action=android.intent.action.MAIN" +
-            ";category=android.intent.category.LAUNCHER" +
+            "intent://open#Intent" +
+            ";scheme=" +
+            scheme.replace("://", "") +
             ";package=" +
             pkg +
-            ";S.browser_fallback_url=" +
-            play +
             ";end";
         } else if (IS_IOS) {
           // iOS: esquema de URL do app (só funciona se o app estiver instalado)
